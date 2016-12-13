@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html ng-app="app">
+<head>
+	<title>Password Rule</title>
+	<style type="text/css">
+		body{
+			font-family: 'Segoe UI',Arial;
+			font-size: 14px;
+		}
+		.error-item{
+			color:#f44253;
+			padding:5px;
+		}
+		button{
+			display: block;
+			padding: 6px 12px;
+			margin-bottom: 0;
+			font-size: 14px;
+			font-weight: 400;
+			line-height: 1.42857143;
+			text-align: center;
+			white-space: nowrap;
+			vertical-align: middle;
+			-ms-touch-action: manipulation;
+			touch-action: manipulation;
+			cursor: pointer;
+			-webkit-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+			background-image: none;
+			border: 1px solid transparent;
+			border-radius: 4px;
+		}
+		button.btn-primary{
+			color: #fff;
+			background-color: #337ab7;
+			border-color: #2e6da4;
+		}
+		.formwrapper{
+			width: 20%;
+			border: 1px solid #cfcfcf;
+			padding: 10px;
+		}
+		input{
+			display: block;
+			margin-bottom: 10px;
+			margin-top:5px;
+			padding:10px;
+			width:90%;
+		}
+		ul{
+			padding:0;
+		}
+		ul li{
+			list-style: none;
+			margin-top: 10px;
+			margin-bottom: 10px;
+		}
+		i{
+			font-family: 'Segoe UI Symbol';
+			font-size: 14px;
+			color:#f44253;
+		}
+	</style>
+</head>
+<body ng-controller="PasswordController">
+	<h1>Password Rule Component</h1>
+	<div class="formwrapper">
+		<form name="passwordrule" novalidate ng-submit="submitted = true">
+			<label>Password</label>
+			<input type="password" name="password" password-rule ng-model="inppassword" required="true">
+			<ul>
+				<li ng-show="submitted && passwordrule.password.$error.required">
+					<i>&#x2718;</i><label class="error-item">Password Should not be empty</label>
+				</li>
+				<li ng-show="submitted && passwordrule.password.$error.semicolon">
+					<i>&#x2718;</i><label class="error-item">Password Should not contain semicolon(;)</label>
+				</li>
+				<li ng-show="submitted && passwordrule.password.$error.count">
+					<i>&#x2718;</i><label class="error-item">Password Should not be less than 8 charecters</label>	
+				</li>
+				<li ng-show="submitted && passwordrule.password.$error.charecter">
+					<i>&#x2718;</i><label class="error-item">Password Should contain atleast one upper case, one lower case, one special and one numeric charecter</label>
+				</li>
+			</ul>
+			<button type="submit" class="btn-primary">Submit</button>
+		</form>
+	</div>
+	<!--Angular Libs -->
+	<script type="text/javascript" src="angular.min.js"></script>
+
+	<script>
+		var app = angular.module('app',[]);
+
+		app.controller('PasswordController',function($scope){
+
+		})
+		.directive('passwordRule',function(){
+			return{
+				restrict:'A',
+				require:'ngModel',
+				link:function(scope,element,attr,ctrl){
+					ctrl.$setValidity('semicolon',true);
+					ctrl.$setValidity('count',true);
+					ctrl.$setValidity('charecter',true);
+					attr.$observe('ngModel',function(v){
+						scope.$watch(v,function(newValue,oldValue){
+							if(newValue && newValue!=oldValue){
+								//Remove the validity for count
+								if(newValue.length>=8){
+									ctrl.$setValidity('count',true);
+								}
+								//Remove the validity for Upper, Lower and Special Charecter
+								if((/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&])[A-Za-z\d$@$!%*?&]{8,}/.test(newValue))){
+									ctrl.$setValidity('charecter',true);
+								}
+								if(newValue.indexOf(';')>-1){
+									ctrl.$setValidity('semicolon',false);
+								}
+								else{
+									ctrl.$setValidity('semicolon',true);	
+								}
+							}
+						});
+					});
+					element.on('blur',function(e){
+						//Check for Count
+						if(this.value.length<8){
+							ctrl.$setValidity('count',false);
+						}
+						//Check for Upper Case Lower Case and Special Charecter
+						if(!(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&])[A-Za-z\d$@$!%*?&]{8,}/.test(this.value))){
+							ctrl.$setValidity('charecter',false);
+						}
+					});
+				}
+			}
+		});
+	</script>
+
+</body>
+</html>
